@@ -3,6 +3,8 @@ package com.kyosk.server.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -15,13 +17,13 @@ public class BookItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String author;
 
-    @Column(length = 255)
+    @Column(name = "genre")
     private String genre;
 
     @Column(name = "publication_date")
@@ -33,9 +35,11 @@ public class BookItem {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
 }
