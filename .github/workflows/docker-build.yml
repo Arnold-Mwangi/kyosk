@@ -13,37 +13,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '23'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '23'
 
-    - name: Install dependencies (Client)
-      run: npm install
-      working-directory: ./client
+      - name: Install dependencies (Client)
+        run: npm install
+        working-directory: ./client
 
-    - name: Build the Client
-      run: npm run build
-      working-directory: ./client
+      - name: Build the Client
+        run: npm run build
+        working-directory: ./client
 
-    - name: Build Docker Image (Client)
-      run: docker build -t kirigwidev/client:latest ./client
+      - name: Build Docker Image (Client)
+        run: docker build -t kirigwidev/client:latest ./client
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Push Docker Image (Client)
-      run: docker push kirigwidev/client:latest
+      - name: Push Docker Image (Client)
+        run: docker push kirigwidev/client:latest
 
   build-server:
     runs-on: ubuntu-latest
-
     services:
-      database:
-        image: postgis/postgis:12-3.3
+       database-service:
+        image: postgres:latest
         ports:
           - 5432:5432
         env:
@@ -53,72 +52,35 @@ jobs:
         options: --health-cmd="pg_isready -U user" --health-timeout=30s --health-retries=5
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Build the JAR with Gradle
-      run: ./gradlew build
-      working-directory: ./server
-
-    - name: Wait for PostgreSQL (PostGIS) to be ready
-      run: |
-        until pg_isready -h localhost -p 5432 -U user; do
-          echo "Waiting for PostgreSQL (PostGIS) to be ready..."
-          sleep 2
-        done
-
-    - name: Run Tests
-      run: ./gradlew test
-      working-directory: ./server
-
-    - name: Build Docker Image (Server)
-      run: docker build -t kirigwidev/server:latest ./server
-
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-    - name: Push Docker Image (Server)
-      run: docker push kirigwidev/server:latest
-  deploy-k8s:
-    runs-on: ubuntu-latest
-    needs: [build-client, build-server]
-    steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up kubectl
-        run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Set up Minikube
-        run: |
-          curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          chmod +x minikube
-          sudo mv minikube /usr/local/bin/
-          sudo minikube start --driver=docker
-          sudo minikube status
+      - name: Build the JAR with Gradle
+        run: ./gradlew build
+        working-directory: ./server
 
-      - name: Configure kubectl
+      - name: Wait for PostgreSQL to be ready
         run: |
-          sudo minikube update-context
+          until pg_isready -h localhost -p 5432 -U user; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
 
-      - name: List files in k8s directory
-        run: ls k8s
+      - name: Run Tests
+        run: ./gradlew test
+        working-directory: ./server
 
-      - name: Apply Kubernetes manifests
-        working-directory: ./k8s
-        run: |
-          kubectl apply -f database-deployment.yaml
-          kubectl apply -f database-service.yaml
-          kubectl apply -f server-deployment.yaml
-          kubectl apply -f server-service.yaml
-          kubectl apply -f client-deployment.yaml
-          kubectl apply -f client-service.yaml
+      - name: Build Docker Image (Server)
+        run: docker build -t kirigwidev/server:latest ./server
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push Docker Image (Server)
+        run: docker push kirigwidev/server:latest
