@@ -40,8 +40,9 @@ jobs:
 
   build-server:
     runs-on: ubuntu-latest
+
     services:
-       database-service:
+      database-service:
         image: postgres:latest
         ports:
           - 5432:5432
@@ -61,16 +62,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build the JAR with Gradle
-        run: ./gradlew build
-        working-directory: ./server
-
       - name: Wait for PostgreSQL to be ready
         run: |
           until pg_isready -h localhost -p 5432 -U user; do
             echo "Waiting for PostgreSQL to be ready..."
             sleep 2
           done
+
+      - name: Build the JAR with Gradle
+        run: ./gradlew build
+        working-directory: ./server
 
       - name: Run Tests
         run: ./gradlew test
