@@ -85,3 +85,22 @@ jobs:
 
     - name: Push Docker Image (Server)
       run: docker push kirigwidev/server:latest
+
+  deploy-k8s:
+    runs-on: ubuntu-latest
+    needs: [build-client, build-server]
+    steps:
+      - name: Set up kubectl
+        run: |
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/database-deployment.yaml
+          kubectl apply -f k8s/database-service.yaml
+          kubectl apply -f k8s/server-deployment.yaml
+          kubectl apply -f k8s/server-service.yaml
+          kubectl apply -f k8s/client-deployment.yaml
+          kubectl apply -f k8s/client-service.yaml

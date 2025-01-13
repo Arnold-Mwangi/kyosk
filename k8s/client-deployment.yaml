@@ -13,7 +13,12 @@ spec:
         app: client
     spec:
       containers:
-      - name: client
-        image: kirigwidev/client:latest
-        ports:
-        - containerPort: 80
+        - name: client
+          image: kirigwidev/client:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: NEXT_PUBLIC_BASE_URL
+              value: "http://client-service:80" # Use Kubernetes service URL for frontend
+            - name: BACKEND_API_URL
+              value: "http://server-service:8080/kyosk/api/v1/books" # Use Kubernetes service URL for backend
