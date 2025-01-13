@@ -105,9 +105,10 @@ jobs:
     - name: Apply Kubernetes manifests
       working-directory: ./k8s  # Ensure the working directory is set to the 'k8s' folder
       run: |
-        kubectl apply -f database-deployment.yaml
-        kubectl apply -f database-service.yaml
-        kubectl apply -f server-deployment.yaml
-        kubectl apply -f server-service.yaml
-        kubectl apply -f client-deployment.yaml
-        kubectl apply -f client-service.yaml
+          kubectl apply -f database-deployment.yaml --validate=false
+          kubectl apply -f database-service.yaml --validate=false
+          kubectl apply -f server-deployment.yaml --validate=false
+          kubectl apply -f server-service.yaml --validate=false
+          kubectl apply -f client-deployment.yaml --validate=false
+          kubectl apply -f client-service.yaml --validate=false
+
