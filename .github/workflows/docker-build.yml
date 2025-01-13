@@ -102,10 +102,8 @@ jobs:
     - name: List files in k8s directory
       run: ls k8s
 
-    - name: Change directory to k8s
-      run: cd k8s
-
     - name: Apply Kubernetes manifests
+      working-directory: ./k8s  # Ensure the working directory is set to the 'k8s' folder
       run: |
         kubectl apply -f database-deployment.yaml
         kubectl apply -f database-service.yaml
