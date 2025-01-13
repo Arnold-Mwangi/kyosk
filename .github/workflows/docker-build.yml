@@ -45,10 +45,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-    - name: Build Docker Image (server)
+    - name: Build the JAR with Gradle
+      run: ./gradlew build
+      working-directory: ./server
+
+    - name: Build Docker Image (Server)
       run: docker build -t kirigwidev/server:latest ./server
 
     - name: Log in to Docker Hub
