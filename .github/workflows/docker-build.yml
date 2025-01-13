@@ -1,0 +1,58 @@
+name: Full Stack CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-client:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies (Client)
+      run: npm install
+      working-directory: ./client
+
+    - name: Build the Client
+      run: npm run build
+      working-directory: ./client
+
+    - name: Build Docker Image (Client)
+      run: docker build -t kirigwidev/client:latest ./client
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Push Docker Image (Client)
+      run: docker push kirigwidev/client:latest
+
+  build-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker Image (server)
+      run: docker build -t kirigwidev/server:latest ./server
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Push Docker Image (Server)
+      run: docker push kirigwidev/server:latest
