@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: postgis/postgis:12-3.3
+        env:
+          - name: POSTGRES_USER
+            value: "user"
+          - name: POSTGRES_PASSWORD
+            value: "password"
+          - name: POSTGRES_DB
+            value: "books"
+        ports:
+        - containerPort: 5432
