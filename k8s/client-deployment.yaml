@@ -16,9 +16,9 @@ spec:
         - name: client
           image: kirigwidev/client:latest
           ports:
-            - containerPort: 80
+            - containerPort: 3000  # Change this from 80 to 3000
           env:
             - name: NEXT_PUBLIC_BASE_URL
-              value: "http://client-service:80" # Use Kubernetes service URL for frontend
+              value: "http://client-service:3000"  # Change this from 80 to 3000
             - name: BACKEND_API_URL
-              value: "http://server-service:8080/kyosk/api/v1/books" # Use Kubernetes service URL for backend
+              value: "http://server-service:8080/kyosk/api/v1/books"
