@@ -2,19 +2,23 @@
 
 import { Book } from './types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const API_URL = process.env.BACKEND_API_URL || 'http://server:8080/kyosk/api/v1/books';
 
 export async function getBooks(): Promise<Book[]> {
-  const res = await fetch(`${BASE_URL}/api/books`);
+  const res = await fetch(API_URL, { cache: 'no-store' });
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.error || 'Failed to fetch books');
+    throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
   }
-  return res.json();
+  const data = await res.json();
+  if (!Array.isArray(data)) {
+    throw new Error('Invalid data format received from API');
+  }
+  return data;
 }
 
 export async function addBook(book: Omit<Book, 'id' | 'createdAt' | 'updatedAt'>): Promise<Book> {
-  const res = await fetch(`${BASE_URL}/api/books`, {
+  const res = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
