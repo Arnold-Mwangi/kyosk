@@ -39,49 +39,34 @@ jobs:
       run: docker push kirigwidev/client:latest
 
   build-server:
-    runs-on: ubuntu-latest
-
-    services:
-      database-service:
-        image: postgis/postgis:12-3.3
-        ports:
-          - 5432:5432
+      runs-on: ubuntu-latest
+    
+      steps:        
+      - name: Checkout code
+        uses: actions/checkout@v3
+    
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+    
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./server
+    
+      - name: Build and Test
+        run: ./gradlew build
+        working-directory: ./server
         env:
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: books
-        options: --health-cmd="pg_isready -U user" --health-timeout=30s --health-retries=5
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Build the JAR with Gradle
-      run: ./gradlew build
-      working-directory: ./server
-
-    - name: Wait for PostgreSQL (PostGIS) to be ready
-      run: |
-        until pg_isready -h localhost -p 5432 -U user; do
-          echo "Waiting for PostgreSQL (PostGIS) to be ready..."
-          sleep 2
-        done
-
-    - name: Run Tests
-      run: ./gradlew test
-      working-directory: ./server
-
-    - name: Build Docker Image (Server)
-      run: docker build -t kirigwidev/server:latest ./server
-
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-    - name: Push Docker Image (Server)
-      run: docker push kirigwidev/server:latest
+          SPRING_PROFILES_ACTIVE: test
+    
+      - name: Build Docker Image (Server)
+        run: docker build -t kirigwidev/server:latest ./server
+    
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    
+      - name: Push Docker Image (Server)
+        run: docker push kirigwidev/server:latest
