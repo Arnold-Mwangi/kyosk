@@ -92,7 +92,7 @@ http://localhost:3000
 Access backend/server (GET/POST)
 
 ```bash
-http://localhost:8080/ap1/v1/books
+http://localhost:8080/kyosk/api/v1/books
 ```
 
 
