@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
+import { getErrorMessage } from '../../lib/utils';
 
-const API_URL = process.env.BACKEND_API_URL || 'http://localhost:8080/kyosk/api/v1/books';
+const API_URL = process.env.BACKEND_API_URL || 'http://server:8080/kyosk/api/v1/books';
 
 export async function GET() {
   try {
-    const res = await fetch(API_URL, { next: { revalidate: 60 } });
+    const res = await fetch(API_URL, { next: { revalidate: 0 } });
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
@@ -12,10 +13,7 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching books:', error);
-    if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
-      return NextResponse.json({ error: 'Backend server is not accessible' }, { status: 503 });
-    }
-    return NextResponse.json({ error: 'Failed to fetch books' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -36,10 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error adding book:', error);
-    if (error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED') {
-      return NextResponse.json({ error: 'Backend server is not accessible' }, { status: 503 });
-    }
-    return NextResponse.json({ error: 'Failed to add book' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 

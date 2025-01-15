@@ -6,12 +6,12 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - server
     environment:
-    - NEXT_PUBLIC_BASE_URL=http://localhost:3000
-    - BACKEND_API_URL=http://localhost:8080/kyosk/api/v1/books
+      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
+      - BACKEND_API_URL=http://server:8080/kyosk/api/v1/books
     networks:
       - backend
 
@@ -22,15 +22,15 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/books
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database-service:5432/books
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
     depends_on:
-      - database
+      - database-service
     networks:
       - backend
 
-  database:
+  database-service:
     image: postgis/postgis:12-3.3
     ports:
       - "5432:5432"
@@ -48,3 +48,4 @@ volumes:
 
 networks:
   backend:
+    driver: bridge

@@ -22,13 +22,11 @@ export default async function Home() {
         <div className="bg-red-600 text-white px-4 py-3 rounded-lg" role="alert">
           <strong className="font-bold">Error:</strong>
           <span className="block sm:inline"> {errorMessage}</span>
-          {errorMessage.includes('Backend server is not accessible') && (
-            <p className="mt-2 text-sm">
-              Please ensure that your backend server is running at {process.env.BACKEND_API_URL || 'http://localhost:8080/kyosk/api/v1/books'}.
-              <br />
-              <Link href="/setup-instructions" className="underline">View setup instructions</Link>
-            </p>
-          )}
+          <p className="mt-2 text-sm">
+            Please ensure that your backend server is running at {process.env.BACKEND_API_URL || 'http://localhost:8080/kyosk/api/v1/books'}.
+            <br />
+            <Link href="/setup-instructions" className="underline">View setup instructions</Link>
+          </p>
         </div>
       </div>
     );
